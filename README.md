@@ -22,21 +22,18 @@ $ npm install xml2json
 ```javascript
 var parser = require('xml2json');
 
+var xml = "<foo attr=\"value\">bar</foo>";
+console.log("input -> %s", xml)
+
 // xml to json
-var xml = "<foo>bar</foo>";
-var json = parser.toJson(xml); //returns a string containing the JSON structure by default
-console.log(json);
+var json = parser.toJson(xml);
+console.log("to json -> %s", json);
 
 // json to xml
-var json = {
-    root: {
-        name: {'$t': 'John', id:'idx'} // $t for text, and all others will be attributes
-    }
-};
-var xml = parser.toXml(xml); //returns xml  <root><name for="idx">John</name></root> 
-console.log(xml)
-
+var xml = parser.toXml(json);
+console.log("back to xml -> %s", xml)
 ```
+
 ## API
 
 ```javascript
@@ -57,6 +54,7 @@ var options = {
     sanitize: true,
     trim: true,
     arrayNotation: false
+    alternateTextNode: false
 };
 ```
 
@@ -64,7 +62,7 @@ var options = {
 * **reversible:** Makes the JSON reversible to XML (*)
 * **coerce:** Makes type coercion. i.e.: numbers and booleans present in attributes and element values are converted from string to its correspondent data types. Coerce can be optionally defined as an object with specific methods of coercion based on attribute name or tag name, with fallback to default coercion.
 * **trim:** Removes leading and trailing whitespaces as well as line terminators in element values.
-* **arrayNotation:** XML child nodes are always treated as arrays
+* **arrayNotation:** XML child nodes are always treated as arrays NB: you can specify a selective array of nodes for this to apply to instead of the whole document. 
 * **sanitize:** Sanitizes the following characters present in element values:
 
 ```javascript
@@ -79,17 +77,21 @@ var chars =  {
     "'": '&apos;'
 };
 ```
+* **alternateTextNode:** Changes the default textNode property from $t to _t when option is set to true. Alternatively a string can be specified which will override $t to what ever the string is.
+
 
 ### Options object for `toXml`
 
 Default values:
 ```javascript
 var options = {
-    sanitize: false
+    sanitize: false,
+    ignoreNull: false
 };
 ```
 
-`sanitize: false` is the default option to behave like previous versions
+* `sanitize: false` is the default option to behave like previous versions
+* **ignoreNull:** Ignores all null values
 
 
 (*) xml2json tranforms CDATA content to JSON, but it doesn't generate a reversible structure.
@@ -97,7 +99,7 @@ var options = {
 ## License
 (The MIT License)
 
-Copyright 2015 BugLabs. All rights reserved.
+Copyright (c) 2016 xml2json AUTHORS 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to

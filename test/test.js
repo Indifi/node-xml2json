@@ -25,7 +25,7 @@ describe('xml2json', function () {
         var result = parser.toJson(xml, { arrayNotation: true });
         var json = internals.readFixture('array-notation.json');
 
-        expect(result).to.deep.equal(json);
+        expect(result).to.equal(json);
 
         done();
     });
@@ -36,7 +36,7 @@ describe('xml2json', function () {
         var result = parser.toJson(xml, { coerce: false });
         var json = internals.readFixture('coerce.json');
 
-        expect(result + '\n').to.deep.equal(json);
+        expect(result + '\n').to.equal(json);
 
         done();
     });
@@ -47,7 +47,7 @@ describe('xml2json', function () {
         var result = parser.toJson(xml, { coerce: false });
         var json = internals.readFixture('domain.json');
 
-        expect(result + '\n').to.deep.equal(json);
+        expect(result + '\n').to.equal(json);
 
         done();
     });
@@ -58,7 +58,7 @@ describe('xml2json', function () {
         var result = parser.toJson(xml, { coerce: false, trim: true, sanitize: false });
         var json = internals.readFixture('large.json');
 
-        expect(result + '\n').to.deep.equal(json);
+        expect(result + '\n').to.equal(json);
 
         done();
     });
@@ -69,7 +69,7 @@ describe('xml2json', function () {
         var result = parser.toJson(xml, {});
         var json = internals.readFixture('reorder.json');
 
-        expect(result).to.deep.equal(json);
+        expect(result).to.equal(json);
 
         done();
     });
@@ -80,7 +80,7 @@ describe('xml2json', function () {
         var result = parser.toJson(xml, { coerce: false, trim: false });
         var json = internals.readFixture('spacetext.json');
 
-        expect(result).to.deep.equal(json);
+        expect(result).to.equal(json);
 
         done();
     });
@@ -88,11 +88,74 @@ describe('xml2json', function () {
     it('does xmlsanitize', function (done) {
 
         var xml = internals.readFixture('xmlsanitize.xml');
-        var result = parser.toJson(xml, {});
+        var result = parser.toJson(xml, {sanitize: true});
         var json = internals.readFixture('xmlsanitize.json');
 
-        expect(result).to.deep.equal(json);
+        expect(result).to.equal(json);
 
+        done();
+    });
+
+    it('does xmlsanitize of text', function (done) {
+
+        var xml = internals.readFixture('xmlsanitize2.xml');
+        var result = parser.toJson(xml, {sanitize: true, reversible: true});
+        var json = internals.readFixture('xmlsanitize2.json');
+
+        expect(result).to.equal(json);
+
+        done();
+    });
+
+    it('does json unsanitize', function (done) {
+
+        var json = internals.readFixture('xmlsanitize.json');
+        var result = parser.toXml(json, {sanitize: true});
+        var xml = internals.readFixture('xmlsanitize.xml');
+
+        expect(result).to.equal(xml);
+
+        done();
+    });
+
+    it('does json unsanitize of text', function (done) {
+
+        var json = internals.readFixture('xmlsanitize2.json');
+        var result = parser.toXml(json, {sanitize: true});
+        var xml = internals.readFixture('xmlsanitize2.xml');
+
+        expect(result).to.equal(xml);
+
+        done();
+    });
+
+    it('does doesnt double sanitize', function (done) {
+
+        var json = internals.readFixture('xmlsanitize3.json');
+        var result = parser.toXml(json, {sanitize: true});
+        var xml = internals.readFixture('xmlsanitize3.xml');
+
+        expect(result).to.equal(xml);
+
+        done();
+    });
+
+    it('does doesnt double unsanitize', function (done) {
+
+        var xml = internals.readFixture('xmlsanitize3.xml');
+        var result = parser.toJson(xml, {sanitize: true, reversible: true});
+        var json = internals.readFixture('xmlsanitize3.json');
+
+        expect(result).to.equal(json);
+        done();
+    });
+
+    it('converts with forceArrays', function(done) {
+        var xml = internals.readFixture('forceArray.xml');
+        var result = parser.toJson(xml, {arrayNotation: ['drivers', 'vehicles']});
+        var json = internals.readFixture('forceArray.json');
+
+        expect(result).to.equal(json);
         done();
     });
 
@@ -150,6 +213,65 @@ describe('xml2json', function () {
         });
     })
 
+    describe('alternateTextNode', function () {
+
+        it('A1: defaults without the option being defined', function(done) {
+
+            var xml = internals.readFixture('alternate-text-node-A.xml');
+            var result = parser.toJson(xml, {reversible: true});
+            var json = internals.readFixture('alternate-text-node-A.json');
+
+            expect(result).to.equal(json);
+
+            done();
+        });
+
+        it('A2: defaults with option as false', function(done) {
+
+            var xml = internals.readFixture('alternate-text-node-A.xml');
+            var result = parser.toJson(xml, {alternateTextNode: false, reversible: true});
+            var json = internals.readFixture('alternate-text-node-A.json');
+
+            expect(result).to.equal(json);
+
+            done();
+        });
+
+
+        it('B: uses alternate text node with option as true', function(done) {
+
+            var xml = internals.readFixture('alternate-text-node-A.xml');
+            var result = parser.toJson(xml, {alternateTextNode: true, reversible: true});
+            var json = internals.readFixture('alternate-text-node-B.json');
+
+            expect(result).to.equal(json);
+
+            done();
+        });
+
+        it('C: overrides text node with option as "xx" string', function(done) {
+
+            var xml = internals.readFixture('alternate-text-node-A.xml');
+            var result = parser.toJson(xml, {alternateTextNode: "xx", reversible: true});
+            var json = internals.readFixture('alternate-text-node-C.json');
+
+            expect(result).to.equal(json);
+
+            done();
+        });
+
+        it('D: double check sanatize and trim', function (done) {
+
+            var xml = internals.readFixture('alternate-text-node-D.xml');
+            var result = parser.toJson(xml, {alternateTextNode: "zz", sanitize: true, trim: true, reversible: true});
+            var json = internals.readFixture('alternate-text-node-D.json');
+
+            expect(result).to.equal(json);
+
+            done();
+        });
+
+    })
 });
 
 
@@ -161,21 +283,47 @@ describe('json2xml', function () {
         var result = parser.toXml(json);
         var xml = internals.readFixture('domain.xml');
 
-        expect(result+'\n').to.deep.equal(xml);
+        expect(result+'\n').to.equal(xml);
 
         done();
     });
 
     it('works with array notation', function (done) {
 
-        var xml = fs.readFileSync('./test/fixtures/array-notation.xml');
-        var expectedJson = JSON.parse( fs.readFileSync('./test/fixtures/array-notation.json') );
+        var xml = internals.readFixture('array-notation.xml');
+        var expectedJson = JSON.parse( internals.readFixture('array-notation.json') );
 
         var json = parser.toJson(xml, {object: true, arrayNotation: true});
 
-        expect(json).to.deep.equal(expectedJson);
+        expect(json).to.equal(expectedJson);
 
         done();
+    });
+
+    describe('ignore null', function () {
+
+        it('ignore null properties {ignoreNull: true}', function (done) {
+
+            var json = JSON.parse( internals.readFixture('null-properties.json') );
+            var expectedXml = internals.readFixture('null-properties-ignored.xml');
+
+            var xml = parser.toXml(json, {ignoreNull: true});
+            expect(xml).to.equal(expectedXml);
+
+            done();
+        });
+
+        it('don\'t ignore null properties (default)', function (done) {
+
+            var json = JSON.parse( internals.readFixture('null-properties.json') );
+            var expectedXml = internals.readFixture('null-properties-not-ignored.xml');
+
+            var xml = parser.toXml(json);
+            expect(xml).to.equal(expectedXml);
+
+            done();
+        });
+
     });
 });
 
